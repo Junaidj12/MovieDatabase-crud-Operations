@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Movie Database</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 40px 60px;
+      border-radius: 20px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .container h1 {
+      margin-bottom: 30px;
+      font-size: 36px;
+      color: #333;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 15px;
+      font-size: 18px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #218838;
+    }
+    a{
+    text-decoration: none;
+    }
+    h4{
+    color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Movie Database</h1>
+   <a href="add"> <button class="btn">Add Movie</button></a>
+   <a href="view"> <button class="btn">View All Movies</button></a>
+  <h4 th:text="${message}"></h4> 
+    <h4 th:text="${delete}"></h4> 
+
+  </div>
+   
+</body>
+</html>

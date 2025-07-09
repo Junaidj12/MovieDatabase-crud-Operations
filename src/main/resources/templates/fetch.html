@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>All Movies</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      color: #fff;
+      margin-bottom: 30px;
+      font-size: 28px;
+      text-align: center;
+    }
+
+    .table-container {
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 16px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      max-width: 1000px;
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      font-size: 15px;
+      border-collapse: collapse;
+    }
+
+    th {
+      background-color: #0072ff;
+      color: #fff;
+      padding: 12px 15px;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 2px solid #ddd;
+    }
+
+    tbody tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    img {
+      width: 160px;
+      height: 100px;
+      object-fit: fill;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 8px 14px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 2px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:nth-child(1) {
+      background-color: #dc3545; /* Delete - red */
+      color: white;
+    }
+
+    button:nth-child(2) {
+      background-color: #ffc107; /* Edit - yellow */
+      color: black;
+    }
+
+    a button {
+      background-color: #28a745; /* Back - green */
+      color: white;
+      margin-top: 20px;
+      font-size: 15px;
+    }
+
+    a button:hover {
+      background-color: #218838;
+    }
+
+    @media (max-width: 600px) {
+      th, td {
+        padding: 8px;
+        font-size: 13px;
+      }
+
+      img {
+        width: 80px;
+        height: 50px;
+      }
+
+      button {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h2>All Movies</h2>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Poster</th>
+          <th>Movie Name</th>
+          <th>Lead Actor</th>
+          <th>Lead Actress</th>
+          <th>Genre</th>
+          <th>Plot</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="m:${list}">
+          <td><img th:src="${m.imageLink}" alt="Poster" /></td>
+          <td th:text="${m.name}"></td>
+          <td th:text="${m.actor}"></td>
+          <td th:text="${m.actress}"></td>
+          <td th:text="${m.genre}"></td>
+          <td th:text="${m.plot}"></td>
+          <td>
+            <a th:href="'/delete?id=' + ${m.id}"><button>Delete</button></a>
+            <a th:href="'/edit?id=' + ${m.id}"><button>Edit</button></a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <a href="/"><button>Back</button></a>
+  </div>
+</body>
+</html>
