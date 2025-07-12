@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>MovieGram</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      padding: 80px 16px 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: #fff;
+      color: #0072ff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-links a {
+      background: none;
+      border: none;
+      color: #0072ff;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .movie-card {
+      background: #fff;
+      width: 100%;
+      max-width: 450px;
+      border-radius: 16px;
+      margin: 16px 0;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .movie-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .movie-content {
+      padding: 16px;
+    }
+
+    .movie-content h3 {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .movie-content p {
+      font-size: 14px;
+      margin: 4px 0;
+      color: #444;
+    }
+
+    .no-movies {
+      margin-top: 40px;
+      color: white;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .bottom-nav {
+      display: none;
+    }
+
+    @media screen and (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+
+      .bottom-nav {
+        display: flex;
+        justify-content: space-around;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        padding: 10px 0;
+        box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+      }
+
+      .bottom-nav a {
+        text-align: center;
+        color: #0072ff;
+        font-size: 12px;
+        text-decoration: none;
+      }
+
+      body {
+        padding-bottom: 100px;
+        padding-top: 70px;
+      }
+    }
+  </style>
+  <link rel="icon" type="image/png" href="/images/theatre.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+<header>
+  <h1><i class="fa-solid fa-clapperboard"></i> MovieGram</h1>
+  <div class="nav-links">
+    <a href="/register">Register</a>
+    <a href="/login">Login</a>
+  </div>
+</header>
+
+<!-- Movies -->
+<div th:if="${#lists.isEmpty(movies)}" class="no-movies">
+  No movies found. Be the first to add one!
+</div>
+
+<div th:each="m : ${movies}" class="movie-card">
+  <img th:src="${m.imageLink}" alt="Poster" />
+  <div class="movie-content">
+    <h3 th:text="${m.name}">Movie Title</h3>
+    <p><b>Genre:</b> <span th:text="${m.genre}">Genre</span></p>
+    <p><b>Plot:</b> <span th:text="${m.plot}">Plot</span></p>
+    <p><b>Added by:</b> <span th:text="${m.owner != null ? m.owner.name : 'Anonymous'}">Anonymous</span></p>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <a href="/"><i class="fa-solid fa-house"></i><br />Feed</a>
+  <a href="/register"><i class="fa-regular fa-rectangle-list"></i><br />Register</a>
+  <a href="/login"><i class="fa-solid fa-arrow-right-to-bracket"></i><br />Login</a>
+</div>
+
+</body>
+</html>

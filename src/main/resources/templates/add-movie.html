@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Movie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    header {
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      max-width: 400px;
+      width: 80%;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #333;
+      font-size: 22px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Hide bottom nav & profile popup on desktop */
+    .bottom-nav,
+    .profile-popup {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: white;
+        border-top: 1px solid #ccc;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .bottom-nav .nav-link {
+        text-align: center;
+        font-size: 13px;
+        text-decoration: none;
+        color: #0072ff;
+      }
+
+      .bottom-nav .nav-link:hover {
+        color: #0051aa;
+      }
+
+      .profile-popup {
+        display: none;
+        position: fixed;
+        bottom: 70px;
+        right: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        padding: 10px;
+      }
+
+      .profile-popup a {
+        display: block;
+        padding: 8px 12px;
+        color: #0072ff;
+        text-decoration: none;
+        font-size: 14px;
+      }
+    }
+    .alert-error {
+  background-color: #ffe6e6;
+  color: #d8000c;
+  border: 1px solid #d8000c;
+  padding: 12px 16px;
+  margin: 20px auto;
+  border-radius: 8px;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.alert-icon {
+  font-size: 20px;
+}
+
+@media screen and (max-width: 768px) {
+  .alert-error {
+    margin: 16px;
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+
+  .alert-icon {
+    font-size: 18px;
+  }
+}
+    
+  </style>
+  <link rel="icon" type="image/png" href="/images/theatre.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+  <header><i class="fa-solid fa-clapperboard"></i> MovieGram</header>
+	
+	<div th:if="${error}" class="alert-error">
+  <span class="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+  <span th:text="${error}">Error message here</span>
+</div>
+		
+		
+  <div class="form-container">
+    <h2>Add New Movie</h2>
+    <form th:action="@{/add-movie}" method="post">
+      <label for="name">Movie Name</label>
+      <input type="text" name="name" id="name" required />
+
+      <label for="genre">Genre</label>
+      <input type="text" name="genre" id="genre" required />
+
+      <label for="plot">Plot</label>
+      <textarea name="plot" id="plot" rows="4" required></textarea>
+
+      <label for="imageLink">Image URL</label>
+      <input type="text" name="imageLink" id="imageLink" required />
+
+      <button type="submit">Add Movie</button>
+    </form>
+  </div>
+
+  <!-- Mobile Bottom Nav -->
+  <div class="bottom-nav">
+    <a href="/" class="nav-link"><i class="fa-solid fa-house"></i><br />Feed</a>
+    <a href="/manage" class="nav-link"><i class="fa-solid fa-pen"></i><br />Manage</a>
+    <a href="/add-movie" class="nav-link"><i class="fa-solid fa-plus"></i><br />Add</a>
+    <a href="#" class="nav-link" onclick="toggleProfilePopup()"><i class="fa-solid fa-user"></i><br />More</a>
+  </div>
+
+  <!-- Profile Popup -->  <!-- Profile Popup -->
+<div id="profilePopup" class="profile-popup">
+  <a href="/profile">Profile</a>
+  <a href="/logout">Logout</a>
+</div>
+
+
+  <script>
+    function toggleProfilePopup() {
+      const popup = document.getElementById('profilePopup');
+      popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+    }
+  </script>
+
+</body>
+</html>

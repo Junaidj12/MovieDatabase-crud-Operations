@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>MovieGram</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+	crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="/feed.css" />
+<link rel="icon" type="image/png" href="/images/theatre.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+	<header>
+		<h1><i class="fa-solid fa-clapperboard"></i> MovieGram</h1>
+
+		<!-- Notification bell (visible on all screens) -->
+<div class="notification-icon" onclick="toggleNotifications()">
+<i class="fa-solid fa-bell"></i>
+  <span th:if="${hasNotifications}" class="red-dot"></span>
+</div>
+
+
+
+		<div class="nav-links">
+			<a href="/add-movie">Add Movie</a> <a href="/manage">Manage</a> <a
+				href="/profile">Profile</a> <a href="/logout">Logout</a>
+		</div>
+	</header>
+
+
+	<!-- Notifications Popup -->
+	<div id="notificationPopup" class="notification-popup">
+		<h4>Notifications</h4>
+		<div th:if="${notifications == null or notifications.isEmpty()}">
+			<p>No notifications.</p>
+		</div>
+		<div th:each="n : ${notifications}" class="notification-item">
+			<span th:text="${n.message}"></span> <a
+				th:href="@{'/delete-notification?id=' + ${n.id}}"
+				class="delete-icon">❌</a>
+		</div>
+	</div>
+
+	<!-- Feed Movies -->
+	<div th:each="m : ${movies}" class="movie-card">
+		<img th:src="${m.imageLink}" alt="Poster" />
+		<div class="movie-content">
+			<h3 th:text="${m.name}">Movie Title</h3>
+			<p>
+				<b>Genre:</b> <span th:text="${m.genre}"></span>
+			</p>
+			<p>
+				<b>Plot:</b> <span th:text="${m.plot}"></span>
+			</p>
+			<p>
+				<b>Added by:</b> <span
+					th:text="${m.owner != null ? m.owner.name : 'Anonymous'}"></span>
+			</p>
+		</div>
+
+		<button class="like-btn" th:attr="data-id=${m.id}">
+			<i class="fa fa-heart"
+				th:classappend="${#lists.contains(currentFriend.likedMovieIds, m.id)} ? 'fas liked' : 'far unliked'">
+			</i> 
+			<span class="like-count" th:text="${m.likes}"></span>
+		</button>
+
+		<div class="movie-footer">
+			<form action="/recommend" method="post">
+				<input type="hidden" name="movieId" th:value="${m.id}" /> <select
+					name="toFriendId" required>
+					<option disabled selected>Recommend to a friend</option>
+					<option th:each="f : ${friends}" th:value="${f.id}"
+						th:text="${f.name}"></option>
+				</select> <input type="text" name="note" placeholder="Optional message..." />
+				<button type="submit">Recommend</button>
+			</form>
+		</div>
+	</div>
+
+	<!-- Bottom Nav -->
+	<div class="bottom-nav">
+		<a href="/feed"><i class="fa-solid fa-house"></i><br />Feed
+		</a> <a href="/manage"><i class="fa-solid fa-pen"></i>️<br />Manage
+		</a> <a href="/add-movie"><i class="fa-solid fa-plus"></i><br />Add
+		</a> <a href="#" onclick="toggleProfilePopup()"><i class="fa-solid fa-user"></i><br />More
+		</a>
+	</div>
+
+	<!-- Profile Popup -->
+	<div id="profilePopup" class="profile-popup">
+		<a href="/profile">Profile</a> <a href="/logout">Logout</a>
+	</div>
+
+	<script>
+  function toggleProfilePopup() {
+    const popup = document.getElementById('profilePopup');
+    popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function toggleNotifications() {
+    const popup = document.getElementById('notificationPopup');
+    popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+  }
+
+  // Like Button Logic
+  document.querySelectorAll('.like-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const movieId = this.getAttribute('data-id');
+      const heartIcon = this.querySelector('i');
+      const likeCountSpan = this.querySelector('.like-count');
+      let currentCount = parseInt(likeCountSpan.textContent);
+
+      fetch('/toggle-like', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'id=' + movieId
+      })
+      .then(res => res.text())
+      .then(result => {
+        const liked = heartIcon.classList.contains('liked');
+
+        if (result === 'liked') {
+          heartIcon.classList.remove('far', 'unliked');
+          heartIcon.classList.add('fas', 'liked');
+          likeCountSpan.textContent = currentCount + 1;
+        } else if (result === 'unliked') {
+          heartIcon.classList.remove('fas', 'liked');
+          heartIcon.classList.add('far', 'unliked');
+          likeCountSpan.textContent = currentCount - 1;
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

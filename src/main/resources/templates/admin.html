@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Dashboard - MovieGram</title>
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<style>
+:root {
+	--purple: #7e5bef;
+	--dark-purple: #5b3cc4;
+	--pink: #f271c2;
+	--bg: #f8f9fe;
+	--white: #fff;
+	--gray: #666;
+	--subtle: #aaa;
+	--light: #f1f1ff;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+	background-color: var(--bg);
+	color: var(--gray);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	overflow-x: hidden;
+}
+
+.container {
+	width: 100%;
+	max-width: 1000px;
+	padding: 20px;
+}
+
+.header {
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+.header h1 {
+	font-size: 28px;
+	background: linear-gradient(90deg, var(--purple), var(--pink));
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 16px;
+	margin: 20px 0;
+}
+
+.card {
+	background: var(--white);
+	border-radius: 16px;
+	padding: 20px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+	transition: transform 0.2s ease;
+}
+
+.card:hover {
+	transform: translateY(-4px);
+}
+
+.card h2 {
+	font-size: 22px;
+	color: var(--purple);
+}
+
+.card p {
+	font-size: 14px;
+	color: var(--subtle);
+}
+
+.section h3 {
+	margin: 24px 0 8px;
+	font-size: 18px;
+	color: var(--dark-purple);
+}
+
+form {
+	margin-bottom: 24px;
+}
+
+textarea, input[type="text"] {
+	width: 100%;
+	padding: 10px;
+	border-radius: 12px;
+	border: 1px solid #ddd;
+	margin-bottom: 10px;
+	font-size: 14px;
+}
+
+button {
+	background: linear-gradient(90deg, var(--purple), var(--pink));
+	border: none;
+	padding: 10px 20px;
+	color: white;
+	border-radius: 10px;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.table {
+	width: 100%;
+	border-collapse: collapse;
+	background: var(--white);
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.table th, .table td {
+	padding: 12px 16px;
+	font-size: 14px;
+	text-align: left;
+	border-bottom: 1px solid #eee;
+}
+
+.table th {
+	background-color: var(--light);
+	color: var(--dark-purple);
+}
+
+.table td button {
+	background: #ff5e57;
+	padding: 4px 8px;
+	border: none;
+	color: white;
+	border-radius: 5px;
+	font-size: 12px;
+}
+
+.avatar {
+	width: 30px;
+	height: 30px;
+	background: var(--purple);
+	color: white;
+	font-size: 14px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	margin-right: 8px;
+}
+
+.user-row {
+	display: flex;
+	align-items: center;
+}
+
+/* Chart Canvas */
+.chart-box {
+	background: var(--white);
+	border-radius: 16px;
+	padding: 20px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+	margin-top: 20px;
+}
+
+canvas {
+	width: 100%;
+	max-height: 280px;
+}
+
+/* Live Map */
+.map {
+	margin-top: 24px;
+	height: 200px;
+	border-radius: 16px;
+	background: linear-gradient(135deg, #eee, #ddd);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #888;
+	font-size: 16px;
+}
+
+@media screen and (max-width: 768px) {
+	.container {
+		padding: 16px;
+	}
+	.header h1 {
+		font-size: 22px;
+	}
+	.card h2 {
+		font-size: 20px;
+	}
+	.table th, .table td {
+		font-size: 13px;
+	}
+	.avatar {
+		width: 26px;
+		height: 26px;
+		font-size: 12px;
+	}
+}
+
+.topbar {
+	width: 100%;
+	background: linear-gradient(90deg, var(--purple), var(--pink));
+	color: white;
+	padding: 16px 24px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	position: sticky;
+	top: 0;
+	z-index: 1000;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.topbar h1 {
+	font-size: 20px;
+	margin: 0;
+}
+
+.logout-btn {
+	background: white;
+	color: var(--purple);
+	border: none;
+	padding: 8px 16px;
+	border-radius: 8px;
+	font-size: 14px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	transition: background 0.2s ease;
+}
+
+.logout-btn:hover {
+	background: #f4f4ff;
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="icon" type="image/png" href="/images/theatre.png">
+</head>
+<body>
+
+	<header class="topbar">
+		<h1><i class="fa-solid fa-clapperboard"></i> MovieGram Admin</h1>
+		<button class="logout-btn" onclick="location.href='/admin/logout'">
+			<i class="fas fa-sign-out-alt"></i> Logout
+		</button>
+	</header>
+
+
+	<div class="container">
+		<div class="header">
+			<h1><i class="fa-solid fa-clapperboard"></i> MovieGram Admin</h1>
+		</div>
+
+		<!-- Overview Cards -->
+		<div class="grid">
+			<div class="card">
+				<h2 th:text="${totalUsers}">0</h2>
+				<p>Total Users</p>
+			</div>
+			<div class="card">
+				<h2 th:text="${totalMovies}">0</h2>
+				<p>Total Movies</p>
+			</div>
+		</div>
+
+		<!-- Chart -->
+		<div class="chart-box">
+			<canvas id="statsChart"></canvas>
+		</div>
+
+		<!-- Broadcast Form -->
+		<div class="section">
+			<h3><i class="fa-solid fa-bullhorn"></i> Broadcast Notification</h3>
+			<form action="/admin/broadcast" method="post">
+				<textarea name="message" placeholder="Type your message..." required></textarea>
+				<button type="submit">Send</button>
+			</form>
+		</div>
+
+		<!-- Ban User -->
+		<div class="section">
+			<h3><i class="fa-solid fa-user-slash"></i> Ban User</h3>
+			<form action="/admin/ban-user" method="post">
+				<input type="text" name="mobile" placeholder="Enter mobile number"
+					required />
+				<button type="submit">Ban</button>
+			</form>
+		</div>
+
+		<!-- Users Table -->
+		<div class="section">
+			<h3><i class="fa-solid fa-users"></i> All Users</h3>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>User</th>
+						<th>Mobile</th>
+						<th>Movies</th>
+						<th>Likes</th>
+						<th>Password</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="u : ${allUsers}">
+						<td>
+							<div class="user-row">
+								<div class="avatar" th:text="${u.name.substring(0,1)}">U</div>
+								<span th:text="${u.name}">Name</span>
+							</div>
+						</td>
+						<td th:text="${u.mobile}">Mobile</td>
+						<td th:text="${u.addedMovies.size()}">0</td>
+						<td th:text="${u.totalLikes}">0</td>
+						<td th:text="${u.password}">*****</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Movies Table -->
+		<div class="section">
+			<h3><i class="fa-solid fa-film"></i> All Movies</h3>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Title</th>
+						<th>Genre</th>
+						<th>Owner</th>
+						<th>Likes</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="m : ${allMovies}">
+						<td th:text="${m.id}">1</td>
+						<td th:text="${m.name}">Movie</td>
+						<td th:text="${m.genre}">Genre</td>
+						<td th:text="${m.owner.name}">Owner</td>
+						<td th:text="${m.likes}">0</td>
+						<td>
+							<form th:action="@{/admin/delete-movie}" method="post">
+								<input type="hidden" name="id" th:value="${m.id}" />
+								<button type="submit"><i class="fa-solid fa-trash"></i></button>
+							</form>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Live Map -->
+		<div class="map">Live Map Coming Soon</div>
+	</div>
+
+	<!-- Chart.js -->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script>
+		const ctx = document.getElementById('statsChart').getContext('2d');
+		new Chart(ctx, {
+			type : 'line',
+			data : {
+				labels : [ 'Jan', 'Feb', 'Mar', 'Apr', 'May' ],
+				datasets : [ {
+					label : 'Movies Added',
+					data : [ 5, 8, 4, 9, 6 ],
+					borderColor : '#7e5bef',
+					backgroundColor : 'rgba(126,91,239,0.1)',
+					tension : 0.4
+				} ]
+			},
+			options : {
+				responsive : true,
+				scales : {
+					y : {
+						beginAtZero : true
+					}
+				}
+			}
+		});
+	</script>
+
+</body>
+</html>

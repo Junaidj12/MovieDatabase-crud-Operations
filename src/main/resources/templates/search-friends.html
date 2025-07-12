@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Search Friends</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 16px;
+      background: #fafafa;
+    }
+
+    .search-form {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-form input {
+      flex: 1;
+      padding: 8px;
+    }
+
+    .search-form button {
+      padding: 8px 16px;
+    }
+
+    .friend-card {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .friend-card form {
+      display: inline;
+    }
+
+    .friend-card button {
+      background-color: #0072ff;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+  </style>
+  <link rel="icon" type="image/png" href="/images/theatre.png">
+</head>
+<body>
+  <h2>🔍 Search Friends</h2>
+
+  <form class="search-form" th:action="@{/search-friends/result}" method="get">
+    <input type="text" name="query" placeholder="Enter name or mobile..." th:value="${query}">
+    <button type="submit">Search</button>
+  </form>
+
+  <div th:if="${results != null}">
+    <div th:if="${#lists.isEmpty(results)}">
+      <p>No friends found.</p>
+    </div>
+    <div th:each="friend : ${results}" class="friend-card">
+      <span th:text="${friend.name}">Name</span> -
+      <span th:text="${friend.mobile}">Mobile</span>
+      <form th:action="@{/add-friend}" method="post">
+        <input type="hidden" name="friendId" th:value="${friend.id}" />
+        <button type="submit">Add Friend</button>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>
