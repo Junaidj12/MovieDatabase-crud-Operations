@@ -28,10 +28,16 @@ public class Movie {
     public void setLikedByCurrentUser(boolean likedByCurrentUser) {
         this.likedByCurrentUser = likedByCurrentUser;
     }
+    public Movie() {}
+    public Movie(String name, String genre, String plot, String imageLink) {
+        this.name = name;
+        this.genre = genre;
+        this.plot  = plot;
+        this.imageLink = imageLink;     // field name must match your entity
+    }
 
 
-
-    // Getters and Setters
+	// Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

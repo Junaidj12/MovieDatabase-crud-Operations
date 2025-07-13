@@ -46,7 +46,7 @@
 
 	<!-- Feed Movies -->
 	<div th:each="m : ${movies}" class="movie-card">
-		<img th:src="${m.imageLink}" alt="Poster" />
+		<img th:src="${m.imageLink}" alt="Movie Poster" style="width: 100%; border-radius: 10px;" />
 		<div class="movie-content">
 			<h3 th:text="${m.name}">Movie Title</h3>
 			<p>

@@ -2,32 +2,21 @@ package com.mvc.crud.controller;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.mvc.crud.model.Friend;
-import com.mvc.crud.model.Movie;
-import com.mvc.crud.model.Notification;
-import com.mvc.crud.model.Recommendation;
-import com.mvc.crud.repository.FriendRepository;
-import com.mvc.crud.repository.NotificationRepository;
-import com.mvc.crud.repository.RecommendationRepo;
-import com.mvc.crud.repository.movierepository;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import com.mvc.crud.model.*;
+import com.mvc.crud.repository.*;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 
 @Controller
 public class MyController {
@@ -42,7 +31,10 @@ public class MyController {
     RecommendationRepo recommendationRepo;
 
     @Autowired
-    private NotificationRepository notificationRepo;
+    NotificationRepository notificationRepo;
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     // Home Feed
     @GetMapping("/")
@@ -57,7 +49,7 @@ public class MyController {
 
     private String prepareFeed(HttpServletRequest request, HttpSession session, Model model) {
         List<Movie> movies = movieRepository.findAllByOrderByIdDesc();
-        model.addAttribute("movies", movies); // ✅ Always add movies
+        model.addAttribute("movies", movies);
 
         Friend currentFriend = getCurrentFriendFromCookie(request);
         if (currentFriend == null) {
@@ -65,10 +57,8 @@ public class MyController {
         }
 
         session.setAttribute("user", currentFriend);
-        List<Friend> friends = friendRepository.findAll();
+        model.addAttribute("friends", friendRepository.findAll());
         List<Notification> notifications = notificationRepo.findByRecipientOrderByTimestampDesc(currentFriend);
-
-        model.addAttribute("friends", friends);
         model.addAttribute("currentFriend", currentFriend);
         model.addAttribute("hasNotifications", !notifications.isEmpty());
         model.addAttribute("notifications", notifications);
@@ -76,9 +66,7 @@ public class MyController {
         return "feed";
     }
 
-
-
-    // Register
+    // Quick Register
     @PostMapping("/quick-register")
     public String register(@RequestParam String name,
                            @RequestParam String mobile,
@@ -102,7 +90,7 @@ public class MyController {
         return "redirect:/";
     }
 
-    // Add Movie (GET)
+    // Add Movie - GET
     @GetMapping("/add-movie")
     public String showAddMovieForm(HttpServletRequest request, HttpSession session) {
         Friend friend = (Friend) session.getAttribute("user");
@@ -114,24 +102,32 @@ public class MyController {
         return "add-movie";
     }
 
-    // Add Movie (POST)
+    // Add Movie - POST
+    @Transactional
     @PostMapping("/add-movie")
-    public String addMovie(@ModelAttribute Movie movie, HttpServletRequest request, HttpSession session, Model model) {
-        Friend currentUser = (Friend) session.getAttribute("user");
+    public String addMovie(@RequestParam("name") String name,
+                           @RequestParam("genre") String genre,
+                           @RequestParam("plot") String plot,
+                           @RequestParam("image") MultipartFile image,
+                           HttpSession session,
+                           Model model) {
+        Friend user = (Friend) session.getAttribute("user");
+        if (user == null) return "redirect:/login";
 
-        if (currentUser == null) {
-            currentUser = getCurrentFriendFromCookie(request);
-            if (currentUser == null) return "redirect:/login";
-            session.setAttribute("user", currentUser);
-        }
+        try {
+            Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
+            String imageUrl = (String) uploadResult.get("secure_url");
 
-        if (movieRepository.existsByNameIgnoreCase(movie.getName())) {
-            model.addAttribute("error", "Movie with this name already exists!");
+            Movie movie = new Movie(name, genre, plot, imageUrl);
+            movie.setOwner(user);
+            movieRepository.save(movie);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Image upload failed. Please try again.");
             return "add-movie";
         }
 
-        movie.setOwner(currentUser);
-        movieRepository.save(movie);
         return "redirect:/";
     }
 
@@ -141,11 +137,29 @@ public class MyController {
         Friend friend = getCurrentFriendFromCookie(request);
         if (friend == null) return "redirect:/register";
 
-        List<Movie> userMovies = movieRepository.findByOwnerId(friend.getId());
+        List<Movie> userMovies = movieRepository.findByOwnerIdOrderByIdDesc(friend.getId());
         model.addAttribute("movies", userMovies);
         return "manage-movies";
     }
 
+    // Profile
+    @GetMapping("/profile")
+    public String profile(HttpSession session, Model model) {
+        Friend user = (Friend) session.getAttribute("user");
+        if (user == null) return "redirect:/login";
+
+        List<Movie> addedMovies = movieRepository.findByOwnerIdOrderByIdDesc(user.getId());
+        Collections.reverse(addedMovies);
+        List<Recommendation> receivedRecommendations = recommendationRepo.findByToFriend(user);
+
+        model.addAttribute("user", user);
+        model.addAttribute("addedMovies", addedMovies);
+        model.addAttribute("receivedRecommendations", receivedRecommendations);
+
+        return "profile";
+    }
+
+    // Like Toggle
     @PostMapping("/toggle-like")
     @ResponseBody
     public String toggleLike(@RequestParam int id, HttpSession session) {
@@ -171,32 +185,13 @@ public class MyController {
             movie.setLikes(movie.getLikes() + 1);
         }
 
-        // Save both movie and user
         friendRepository.save(freshUser);
         movieRepository.save(movie);
 
         return alreadyLiked ? "unliked" : "liked";
     }
 
-    
-
-    // Profile Page
-    @GetMapping("/profile")
-    public String profile(HttpSession session, Model model) {
-        Friend user = (Friend) session.getAttribute("user");
-        if (user == null) return "redirect:/login";
-
-        List<Movie> addedMovies = movieRepository.findByOwner(user);
-        List<Recommendation> receivedRecommendations = recommendationRepo.findByToFriend(user);
-
-        model.addAttribute("user", user);
-        model.addAttribute("addedMovies", addedMovies);
-        model.addAttribute("receivedRecommendations", receivedRecommendations);
-
-        return "profile";
-    }
-
-    // Recommend Movie
+    // Recommendation
     @PostMapping("/recommend")
     public String recommendMovie(@RequestParam int movieId,
                                  @RequestParam int toFriendId,
@@ -212,19 +207,18 @@ public class MyController {
             Recommendation rec = new Recommendation();
             rec.setMovie(movie);
             rec.setFromFriend(fromFriend);
-            rec.setToFriend(toFriend); // <-- Use setToFriend (capital 'T')
+            rec.setToFriend(toFriend);
             rec.setNote(note);
             recommendationRepo.save(rec);
 
-            // Save notification for recipient
-            String message = fromFriend.getName() + " recommended you the movie: " + movie.getName();
-            Notification notification = new Notification(message, toFriend);
+            Notification notification = new Notification(fromFriend.getName() + " recommended you the movie: " + movie.getName(), toFriend);
             notificationRepo.save(notification);
         }
 
         return "redirect:/";
     }
 
+    // Delete Recommendation
     @GetMapping("/delete-recommendation")
     public String deleteRecommendation(@RequestParam Integer id, HttpSession session) {
         Friend user = (Friend) session.getAttribute("user");
@@ -238,10 +232,6 @@ public class MyController {
         return "redirect:/profile";
     }
 
-
-
-
-
     // Delete Notification
     @PostMapping("/notification/delete")
     @ResponseBody
@@ -250,41 +240,62 @@ public class MyController {
         return "deleted";
     }
 
-    // Logout
-    @GetMapping("/logout")
-    public String logout(HttpServletResponse response, HttpSession session) {
-        Cookie cookie = new Cookie("userMobile", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
-        session.invalidate();
-        return "redirect:/";
-    }
     @GetMapping("/delete-notification")
     public String deleteNotification1(@RequestParam("id") Long id) {
         notificationRepo.deleteById(id);
-        return "redirect:/feed"; // Make sure you have a @GetMapping("/feed") controller
+        return "redirect:/feed";
     }
+
+    // Edit Movie (GET)
     @GetMapping("/edit")
     public String editMovie(@RequestParam("id") int id, Model model) {
         Optional<Movie> movieOpt = movieRepository.findById(id);
         if (movieOpt.isPresent()) {
             model.addAttribute("m", movieOpt.get());
-            return "edit"; // make sure the file is edit.html
+            return "edit";
         } else {
-            return "redirect:/manage"; // fallback
+            return "redirect:/manage";
         }
     }
+
+    // Update Movie (with optional image change)
     @PostMapping("/update")
-    public String updateMovie(@ModelAttribute Movie m) {
-        movieRepository.save(m); // updates based on `id`
-        return "redirect:/admin/dashboard"; // or wherever
+    public String updateMovie(@ModelAttribute Movie m,
+                              @RequestParam("image") MultipartFile image,
+                              HttpSession session,
+                              Model model) {
+        Friend user = (Friend) session.getAttribute("user");
+        if (user == null) return "redirect:/login";
+
+        Optional<Movie> existingOpt = movieRepository.findById(m.getId());
+        if (existingOpt.isEmpty()) return "redirect:/manage";
+
+        Movie existing = existingOpt.get();
+
+        try {
+            if (!image.isEmpty()) {
+                Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
+                existing.setImageLink((String) uploadResult.get("secure_url"));
+            }
+
+            existing.setName(m.getName());
+            existing.setGenre(m.getGenre());
+            existing.setPlot(m.getPlot());
+
+            movieRepository.save(existing);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Image update failed.");
+            return "edit";
+        }
+
+        return "redirect:/manage";
     }
 
-
+    // Friend Search
     @GetMapping("/search-friends")
     public String showFriendSearchPage() {
-        return "search-friends"; // this will show the blank form initially
+        return "search-friends";
     }
 
     @GetMapping("/search-friends/result")
@@ -294,26 +305,8 @@ public class MyController {
         model.addAttribute("query", query);
         return "search-friends";
     }
-    @Transactional
-    @PostMapping("/add-friend")
-    public String addFriend(@RequestParam Long friendId, HttpSession session) {
-        Friend currentUser = (Friend) session.getAttribute("user");
-        if (currentUser == null) return "redirect:/login";
 
-        // Re-fetch current user from DB with initialized friends list
-        Friend freshCurrentUser = friendRepository.findById(currentUser.getId()).orElse(null);
-        Friend friendToAdd = friendRepository.findById(friendId).orElse(null);
-
-        if (freshCurrentUser != null && friendToAdd != null && !freshCurrentUser.getId().equals(friendToAdd.getId())) {
-            freshCurrentUser.getFriends().add(friendToAdd);
-            friendRepository.save(freshCurrentUser);
-        }
-
-        return "redirect:/search-friends";
-    }
-
-
-    // Get user from cookie
+    // Helper
     private Friend getCurrentFriendFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -325,5 +318,4 @@ public class MyController {
         }
         return null;
     }
-    
 }

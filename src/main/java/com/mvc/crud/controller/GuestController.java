@@ -50,6 +50,7 @@ public class GuestController {
         }
 
         session.setAttribute("user", user);
+        session.setAttribute("mobile", user.getMobile());
 
         // Optional: also set mobile cookie here if needed
         Cookie mobileCookie = new Cookie("userMobile", mobile);

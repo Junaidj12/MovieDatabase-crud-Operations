@@ -16,5 +16,8 @@ public interface movierepository extends JpaRepository<Movie, Integer>{
 	List<Movie> findByOwnerId(Long long1);
 	
 	boolean existsByNameIgnoreCase(String name);
+	
+	List<Movie> findByOwnerIdOrderByIdDesc(Long ownerId);
+
 
 }
