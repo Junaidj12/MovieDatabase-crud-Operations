@@ -1,34 +1,45 @@
-# 🎬 Movie Database - CRUD Operations (Java + Spring Boot)
+# 🎬 MovieGram
 
-This is a simple web application built using **Spring Boot** that allows users to perform **CRUD (Create, Read, Update, Delete)** operations on a movie database. It's a great beginner-friendly project to understand how web apps interact with databases using Spring MVC and Spring Data JPA.
+MovieGram is a mobile-first social movie-sharing web app built with **Spring Boot** and **Thymeleaf**, designed for a small group of friends to share, recommend, and manage movies with ease. Think of it as a minimalist Instagram for movies.
 
-## 🚀 Features
+## 📱 Features
 
-- Add new movies to the database
-- View a list of all movies
-- Update movie details
-- Delete movies from the database
-- Simple HTML + Thymeleaf-based UI
-- Uses H2 in-memory database for development
+- 🧑‍🤝‍🧑 Simple friend-based registration (name + mobile only)
+- 🏠 Feed page showing movies added by all users
+- ➕ Add new movies with title, plot, and poster image (via Cloudinary)
+- ❤️ Recommend any movie to a friend with a personal note
+- 🔔 In-app notification system for recommendations
+- 👤 Profile page showing:
+  - Movies added by the user
+  - Recommendations received (with delete option)
+- 🛠 Admin panel with:
+  - Total users & movies
+  - Ban users by mobile number
+  - Broadcast announcements
+  - View/delete all users and movies
+- 📱 Fully mobile responsive with a clean UI and bottom navigation
 
-## 🛠️ Tech Stack
+## 💻 Tech Stack
 
-- **Java 17**
-- **Spring Boot**
-- **Spring MVC**
-- **Spring Data JPA**
-- **H2 Database**
-- **Thymeleaf** (for UI)
-
-## ⚙️ How to Run
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Junaidj12/MovieDatabase-crud-Operations.git
-2. Open the project in your favorite IDE (IntelliJ, Eclipse, etc.)
-3. Run the main application class:
-   MovieDatabaseCrudOperationsApplication.java
-4. Access the app in your browser at:
-   http://localhost:7890/
+- **Backend**: Spring Boot 3, Spring MVC, Spring Data JPA
+- **Frontend**: Thymeleaf, HTML/CSS, Font Awesome
+- **Database**: H2 (in-memory) or MySQL/PostgreSQL
+- **Image Hosting**: [Cloudinary](https://cloudinary.com/)
+- **Deployment**: Docker + Render
 
 
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Java 17+
+- Maven
+- Cloudinary account (for image upload)
+- GitHub account (for deployment to Render)
+
+### Running Locally
+
+```bash
+git clone https://github.com/YOUR_USERNAME/moviegram.git
+cd moviegram
+./mvnw spring-boot:run
