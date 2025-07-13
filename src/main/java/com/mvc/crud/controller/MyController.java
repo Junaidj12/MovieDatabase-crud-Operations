@@ -275,6 +275,13 @@ public class MyController {
             return "redirect:/manage"; // fallback
         }
     }
+    @PostMapping("/update")
+    public String updateMovie(@ModelAttribute Movie m) {
+        movieRepository.save(m); // updates based on `id`
+        return "redirect:/admin/dashboard"; // or wherever
+    }
+
+
     @GetMapping("/search-friends")
     public String showFriendSearchPage() {
         return "search-friends"; // this will show the blank form initially
